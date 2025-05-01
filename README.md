@@ -43,7 +43,7 @@ npm run build
 Email: contact@corn323.com
 Discord: corn323
 ## 協助者
-[R靈](https://github.com/necro-wbj):技術支援
-夜緋羽:美術支援
-CClemon:測試支援
-感謝您使用 FanInteractify，讓我們一起為直播帶來更多互動與樂趣！
+[R靈](https://github.com/necro-wbj)：技術支援
+夜緋羽：美術支援
+CClemon：測試支援
+#### 感謝您使用　FanInteractify，讓我們一起為直播帶來更多互動與樂趣！
