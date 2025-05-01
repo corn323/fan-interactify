@@ -1,13 +1,12 @@
-/**
- * @see https://www.electron.build/configuration/configuration
- */
 {
-  "appId": "your.app.id",
+  "appId": "fanInteractionTool",
   "asar": true,
   "extraResources": [
     "node_modules/.prisma/**/*",
     "node_modules/@prisma/client/**/*",
-    "server/prisma/app.db"
+    "server/prisma/userData.db",
+    "server/prisma/schema.prisma",
+    "ngrokUrl.json"
   ],
   "directories": {
     "output": "release/${version}"
@@ -15,6 +14,16 @@
   "files": [
     ".output/**/*",
     "dist-electron"
+  ],
+  "extraFiles": [
+    {
+      "from": "liveStickInteractionPage",
+      "to": "liveStickInteractionPage",
+      "filter": [
+        "**/*"
+      ]
+    },
+    "fanInteraction.html"
   ],
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",
@@ -26,7 +35,9 @@
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       }
     ],
     "artifactName": "${productName}_${version}.${ext}"

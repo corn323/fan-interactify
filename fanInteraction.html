@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="螢光棒揮舞">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螢光棒揮舞</title>
+    <style>
+        #lightStick {
+            width: 100px;
+            height: 150px;
+            background-image: url('https://i.postimg.cc/bZVHKbBM/light-Stick.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            transform: translate(-50%, 50%);
+            transition: transform 0.1s ease-out;
+        }
+    </style>
+</head>
+
+<body style="background-color: #000000; color: #FFFFFF;">
+    <div id="mobileContent"
+        style="position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+        <h1>螢光棒揮舞</h1>
+        <p>請揮舞螢光棒<br>看看是否有反應</p>
+        <div id="deviceStatus"></div>
+        <div id="lightStick"></div> <!-- 加入螢光棒元素 -->
+    </div>
+    <div id="desktopContent"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+        <h1>請用手機或平板來訪問網站</h1>
+        <p>這個網站只支援手機或平板，請使用移動設備訪問。</p>
+    </div>
+</body>
+<script>
+    let rotation;
+    const deviceStatus = document.getElementById('deviceStatus');
+    const lightStick = document.getElementById('lightStick');
+
+    function throttle(func, wait) {
+        let lastTime = 0;
+        return function (...args) {
+            const now = Date.now();
+            if (now - lastTime >= wait) {
+                lastTime = now;
+                func(...args);
+            }
+        };
+    }
+
+    function checkDevice() {
+        const isMobile = window.innerWidth <= 1024;
+        if (isMobile) {
+            document.getElementById("mobileContent").style.display = "block";
+            document.getElementById("desktopContent").style.display = "none";
+            initializeDeviceID();
+            monitorDeviceMotion();
+        } else {
+            document.getElementById("mobileContent").style.display = "none";
+            document.getElementById("desktopContent").style.display = "block";
+        }
+    }
+
+    window.onload = checkDevice;
+    window.onresize = checkDevice;
+
+    function initializeDeviceID() {
+        let deviceID = localStorage.getItem("deviceID");
+        if (!deviceID) {
+            deviceID = generateDeviceID();
+            localStorage.setItem("deviceID", deviceID);
+        }
+    }
+
+    function generateDeviceID() {
+        return 'device-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function monitorDeviceMotion() {
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", throttle(handleOrientation, 200), false);
+            window.addEventListener("devicemotion", throttle(handleMotion, 200), false);
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                deviceStatus.textContent = '請點擊此處允許方向訪問';
+                deviceStatus.style.cursor = 'pointer';
+                deviceStatus.onclick = requestIOSPermission;
+            }
+        } else {
+            deviceStatus.textContent = '您的設備不支持動作感應';
+        }
+    }
+
+    function requestIOSPermission() {
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    deviceStatus.textContent = '已允許方向訪問';
+                    deviceStatus.style.cursor = 'default';
+                } else {
+                    deviceStatus.textContent = '無法存取方向感應器';
+                }
+            })
+            .catch(console.error);
+    }
+
+    function handleOrientation(event) {
+        let gamma = event.gamma;
+        processRotation(gamma);
+    }
+
+    function handleMotion(event) {
+        const acceleration = event.acceleration;
+        if (acceleration) {
+            const rotationRate = event.rotationRate;
+            if (rotationRate) {
+                processRotation(rotationRate.gamma);
+            }
+        }
+    }
+
+    function processRotation(gamma) {
+        let direction = 0;
+        if (gamma > 15) {
+            direction = 1;
+        } else if (gamma < -15) {
+            direction = -1;
+        } else {
+            return
+        }
+
+        if (rotation !== direction) {
+            rotation = direction;
+            sendMotionData(rotation);
+            rotateLightStick(rotation);
+        }
+    }
+
+    function sendMotionData(direction) {
+        const apiURL = window.location.href;
+        const deviceID = localStorage.getItem("deviceID");
+        const data = {
+            [deviceID]: direction
+        };
+
+        fetch(apiURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('成功發送資料:', data);
+            })
+            .catch((error) => {
+                console.error('發送資料失敗:', error);
+            });
+    }
+
+    function rotateLightStick(rotationAngle) {
+        rotationAngle = rotationAngle * 15;
+        lightStick.style.transform = `translate(-50%, 50%) rotate(${rotationAngle}deg)`;
+    }
+</script>
+
+</html>

@@ -1,10 +1,11 @@
 {
-  "name": "fan_interaction_tool",
+  "name": "fan-interaction",
   "author": {
     "name": "玉米",
     "url": "https://web.corn323.com",
     "email": "contact@corn323.com"
   },
+  "description": "直播互動工具，只需輸入ngrok的token即可使用，無需額外配置，輕鬆享受直播互動的樂趣！",
   "version": "0.0.1",
   "private": true,
   "main": "dist-electron/main.js",
@@ -26,11 +27,13 @@
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
-    "vuetify": "3.0.6",
+    "qrcode.vue": "^3.6.0",
+    "vuetify": "^3.0.6",
     "zod": "^3.19.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.33.1",
+    "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.1",
     "electron": "27.1.3",
     "electron-builder": "24.6.4",
@@ -38,9 +41,10 @@
     "nuxt": "3.8.0",
     "nuxt-electron": "0.6.0",
     "prisma": "4.7.1",
+    "tree-kill": "^1.2.2",
     "typescript": "^4.9.3",
     "vite-plugin-electron": "^0.15.4",
-    "vite-plugin-vuetify": "^1.0.1"
+    "vite-plugin-vuetify": "^2.1.0"
   },
   "prisma": {
     "schema": "server/prisma/schema.prisma"
