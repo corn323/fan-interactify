@@ -5,14 +5,17 @@
       <p v-else>讀取中...</p>
       <p>蘋果手機、平板請允許方向訪問權限，不然會無法使用</p>
     </div>
+
     <div class="shake-device-container">
-      <div v-for="(shakeDirection, deviceId) in shakeData" :key="deviceId" class="device-shake-item"
-        :style="getRandomPosition(deviceId)">
-        <img src='https://i.postimg.cc/bZVHKbBM/light-Stick.png' :class="[
-          'light-stick',
-          { 'shake-left': Number(shakeDirection) < 0, 'shake-right': Number(shakeDirection) > 0 }
-        ]" alt="Light Stick" />
-      </div>
+      <transition-group name="fade-shake" tag="div">
+        <div v-for="(shakeDirection, deviceId) in shakeData" :key="deviceId" class="device-shake-item"
+          :style="getRandomPosition(deviceId)">
+          <img src="https://i.postimg.cc/bZVHKbBM/light-Stick.png" :class="[
+            'light-stick',
+            { 'shake-left': Number(shakeDirection) < 0, 'shake-right': Number(shakeDirection) > 0 }
+          ]" alt="Light Stick" />
+        </div>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -26,8 +29,9 @@ const shakeData = ref({});
 const positionCache = reactive({});
 const updateInterval = ref(null);
 
-const UPDATE_FREQUENCY = 50;
+const UPDATE_FREQUENCY = 200;
 
+// 取得 QR Code 內容
 onMounted(async () => {
   try {
     const response = await fetch("http://localhost:3001/getUrl");
@@ -38,6 +42,7 @@ onMounted(async () => {
   }
 });
 
+// 裝置位置快取（避免閃爍）
 const getRandomPosition = (deviceId) => {
   if (positionCache[deviceId]) {
     return positionCache[deviceId];
@@ -57,30 +62,46 @@ const getRandomPosition = (deviceId) => {
   return position;
 };
 
+// 取得搖晃資料 + 動態移除舊裝置
 async function fetchUserData() {
   try {
     const response = await fetch("http://localhost:3001/getUserData");
-
     const responseData = await response.json();
 
     const newData = {};
+    const newIds = new Set();
+
     if (Array.isArray(responseData)) {
       for (const device of responseData) {
         newData[device.id] = device.Rotation;
+        newIds.add(device.id);
       }
     } else if (typeof responseData === 'object' && responseData !== null) {
-      Object.assign(newData, responseData);
+      for (const [id, rotation] of Object.entries(responseData)) {
+        newData[id] = rotation;
+        newIds.add(id);
+      }
     }
 
-    shakeData.value = newData;
+    // 刪除消失的裝置 ID
+    for (const existingId in shakeData.value) {
+      if (!newIds.has(existingId)) {
+        delete shakeData.value[existingId];
+        delete positionCache[existingId];
+      }
+    }
+
+    // 合併新資料
+    shakeData.value = { ...shakeData.value, ...newData };
+
   } catch (error) {
     console.error("Error fetching shake data:", error);
   }
 }
 
+// 啟動資料輪詢
 onMounted(() => {
   fetchUserData();
-
   updateInterval.value = setInterval(fetchUserData, UPDATE_FREQUENCY);
 });
 
@@ -95,7 +116,7 @@ onUnmounted(() => {
 .qrcode-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left top;
   margin-top: 20px;
 }
 
@@ -128,5 +149,17 @@ onUnmounted(() => {
 
 .shake-right {
   transform: rotate(15deg);
+}
+
+/* === 平滑進出動畫 === */
+.fade-shake-enter-active,
+.fade-shake-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-shake-enter-from,
+.fade-shake-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
 }
 </style>

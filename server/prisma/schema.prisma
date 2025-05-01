@@ -11,4 +11,5 @@ datasource db {
 model userData {
   id          String @id
   Rotation    Int
+  upDateAt    String
 }

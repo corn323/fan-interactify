@@ -19,25 +19,24 @@
  - Nuxt.js：用於構建前端應用。
  - TypeScript：提供靜態類型檢查，提升開發體驗。
  - Vuetify：提供現代化的 UI 組件。
- Express：伺服器架設(API接收與網頁架設)
- Ngrok：獲取免費公開IP
+ - Express：伺服器架設(API接收與網頁架設)
+ - Ngrok：獲取免費公開網址
  
- ## 安裝與運行
+ ## 自行編譯與運行
  1. 安裝依賴
  在專案根目錄下，運行以下命令來安裝所需的依賴：
  ```
  npm install
  ```
- 2. 運行開發環境
- 運行以下命令來啟動開發模式，並在瀏覽器中預覽專案：
- ```
- npm run dev
- ```
- 3. 專案打包
+ 1. 使用mklink /j 的方式將liveStickInteractionPage與專案目錄底下的interactionPage/.output/public綁定
+ 2. 使用以下命令來初始化userData資料
+ ```prisma migrate dev --name userData.db init```  
+ 3. 運行開發環境
+ 運行來啟動開發模式，並在瀏覽器中預覽專案：
+ ``` npm run dev ```
+ 1. 專案打包
  完成開發後，運行以下命令來打包專案，生成可部署的生產版本：
- ```
- npm run build
- ```
+ ``` npm run build ```
  聯繫方式
  如有任何問題或建議，請聯繫我們：
  Email: contact@corn323.com

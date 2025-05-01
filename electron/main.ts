@@ -14,7 +14,6 @@ let tokenInputWondow: BrowserWindow | null = null;
 let win: BrowserWindow | null = null
 const preload = path.join(__dirname, 'preload.js')
 const distPath = path.join(__dirname, '../.output/public')
-let expressServer;
 let ngrokListener: ngrok.Listener;
 let exePath = path.join(`${__dirname}/../`);
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -24,25 +23,26 @@ if (app.isPackaged) {
 }
 console.log(`exePath: ${exePath}`);
 
-server.use('/', rateLimit({
+const rateLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 600,
+  max: 800,
   message: '請不要發送太多請求',
   keyGenerator: (req) => req.ip ?? ''
-}));
+})
 server.use(bodyParser.json());
 server.get('/', (req, res) => {
   res.status(200).sendFile(path.join(exePath, 'fanInteraction.html'));
 })
 server.use('/interactionPage', internalOnlyMiddleware, express.static(path.join(exePath, 'liveStickInteractionPage')));
 server.get('/getUserData', internalOnlyMiddleware, async (req: Request, res: Response) => {
-  res.status(200).json(await prisma.userData.findMany());
+  const data = await prisma.userData.findMany();
+  res.status(200).json(data);
 })
 server.get('/getUrl', internalOnlyMiddleware, async (req: Request, res: Response) => {
   res.status(200).send(ngrokListener?.url());
 });
 
-server.post('/', async (req: Request, res: Response) => {
+server.post('/', rateLimiter, async (req: Request, res: Response) => {
   const data = req.body
   if (data && Object.keys(data).length > 0) {
     const deviceID = Object.keys(data)[0]
@@ -54,10 +54,20 @@ server.post('/', async (req: Request, res: Response) => {
 
     try {
       await prisma.userData.upsert({
-        where: { id: deviceID },
-        update: { Rotation: rotation },
-        create: { id: deviceID, Rotation: rotation },
+        where: { id: deviceID }, // 只能用主鍵
+        update: {
+          Rotation: rotation,
+          // @ts-ignore
+          upDateAt: Date.now().toString(), // 儲存毫秒 timestamp 作為字串
+        },
+        create: {
+          id: deviceID,
+          Rotation: rotation,
+          // @ts-ignore
+          upDateAt: Date.now().toString(),
+        },
       })
+
       res.status(200).json({ message: '成功接收與更新資料' })
     } catch (error) {
       console.error('資料庫寫入錯誤:', error)
@@ -70,7 +80,7 @@ server.post('/', async (req: Request, res: Response) => {
 
 function internalOnlyMiddleware(req: Request, res: Response, next: NextFunction) {
   const clientIp = req.ip
-  const ngrokUrl: string = ngrokListener.url()!;
+  const ngrokUrl: string = ngrokListener?.url()!;
   if (clientIp?.startsWith(ngrokUrl)) {
     res.status(403).send('Forbidden');
   }
@@ -80,13 +90,29 @@ function internalOnlyMiddleware(req: Request, res: Response, next: NextFunction)
 
 async function startNgrokAndApp(token: string) {
   try {
-    expressServer = server.listen(3001, () => {
+    server.listen(3001, () => {
       console.log('Express已成功運行，網址為:http://localhost:3001');
     });
     ngrokListener = await ngrok.forward({
       addr: 3001,
       authtoken: token
     });
+
+    setInterval(async () => {
+      const now = Date.now();
+      const tenMinutesAgo = now - 10 * 60 * 1000;
+
+      await prisma.userData.deleteMany({
+        where: {
+          // @ts-ignore
+          upDateAt: {
+            lt: tenMinutesAgo.toString(), // 比較字串
+          },
+        },
+      });
+    }, 1000 * 60);
+
+
     try {
       await createWindow();
       tokenInputWondow?.close();
@@ -121,8 +147,8 @@ async function showTokenInputWindow() {
 
 async function createWindow() {
   win = new BrowserWindow({
-    width: 1300,
-    height: 800,
+    width: 800,
+    height: 600,
     icon: path.join(__dirname, '../public/favicon.ico'),
     autoHideMenuBar: true,
     webPreferences: {

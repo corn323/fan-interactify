@@ -1,6 +1,7 @@
 <template>
-    <div>
+    <div class="d-flex flex-column justify-center align-center" style=" height: 100vh; background-color: #f3e8e8;">
         <h1>說明頁面</h1>
+        <sakura />
         <ul>
             <li>出現此畫面代表此程式已正常開啟</li>
             <li>觀眾們的頁面只支援手機或平板，電腦進入無法正常體驗</li>
@@ -20,7 +21,8 @@
 </template>
 
 <script setup>
-
+// @ts-ignore
+import Sakura from '~/components/Sakura.vue';
 function copyText(text) {
     if (navigator.clipboard) {
         copyText = (text) => {

@@ -7,6 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>螢光棒揮舞</title>
     <style>
+        html,
+        body {
+            overflow: hidden !important;
+        }
+
         #lightStick {
             width: 100px;
             height: 150px;
@@ -168,5 +173,6 @@
         lightStick.style.transform = `translate(-50%, 50%) rotate(${rotationAngle}deg)`;
     }
 </script>
+
 
 </html>
