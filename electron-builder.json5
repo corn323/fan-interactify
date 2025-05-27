@@ -1,5 +1,5 @@
 {
-  "appId": "fanInteractionTool",
+  "appId": "fan-interactify",
   "asar": true,
   "extraResources": [
     "node_modules/.prisma/**/*",

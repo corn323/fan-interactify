@@ -125,8 +125,6 @@ onUnmounted(() => {
   position: fixed;
   width: 100%;
   height: 75%;
-  bottom: 0;
-  left: 0;
   overflow: hidden;
   z-index: 10;
   will-change: transform;
@@ -139,7 +137,7 @@ onUnmounted(() => {
 }
 
 .light-stick {
-  width: 50px;
+  width: 100px;
   transform: rotate(0deg);
   transition: transform 0.4s cubic-bezier(0.25, 1.5, 0.5, 1);
 }
