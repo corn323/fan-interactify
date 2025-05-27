@@ -46,8 +46,8 @@
 
  ## 聯繫方式
  如有任何問題或建議，請聯繫我：
- Email: contact@corn323.com
- Discord: corn323
+ - Email: contact@corn323.com
+ - Discord: corn323
 
  ## 協助者
  - [R靈](https://github.com/necro-wbj)：打包等技術支援
