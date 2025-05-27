@@ -6,7 +6,7 @@
     "email": "contact@corn323.com"
   },
   "description": "直播互動工具，只需輸入ngrok的token即可使用，無需額外配置，輕鬆享受直播互動的樂趣！",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {

@@ -3,38 +3,112 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="螢光棒揮舞">
+    <meta name="description" content="揮舞螢光棒">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>螢光棒揮舞</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+
+    <title>揮舞螢光棒</title>
     <style>
         html,
         body {
-            overflow: hidden !important;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #0E5CAD, #2AFADF, #4C83FF);
+            background-size: 600% 600%;
+            animation: flowGradient 10s ease infinite;
+            color: #fff;
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            font-weight: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        @keyframes flowGradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 30px #fff);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 60px #0ff);
+            }
         }
 
         #lightStick {
-            width: 100px;
-            height: 150px;
+            width: 150px;
+            height: 80vh;
             background-image: url('https://i.postimg.cc/bZVHKbBM/light-Stick.png');
             background-size: contain;
             background-repeat: no-repeat;
-            position: absolute;
-            top: 50%;
+            position: fixed;
             left: 50%;
-            transform-origin: center;
-            transform: translate(-50%, 50%);
-            transition: transform 0.1s ease-out;
+            transform: translate(-50%, 50px) rotate(0deg);
+            transform-origin: bottom center;
+            z-index: 2;
+            filter: drop-shadow(0 0 40px #fff);
+            animation: flicker 1s infinite ease-in-out;
+        }
+
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            }
+
+            50% {
+                box-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+            }
+
+            100% {
+                box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            }
+        }
+
+        #deviceStatus {
+            background-color: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #0ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: glowPulse 2s infinite;
+        }
+
+        #deviceStatus:hover {
+            background-color: #ddd;
+            box-shadow: 0 0 20px #0ff;
         }
     </style>
 </head>
 
-<body style="background-color: #000000; color: #FFFFFF;">
+<body style="background-color: #000000; color: #fff;">
     <div id="mobileContent"
-        style="position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-        <h1>螢光棒揮舞</h1>
-        <p>請揮舞螢光棒<br>看看是否有反應</p>
-        <div id="deviceStatus"></div>
-        <div id="lightStick"></div> <!-- 加入螢光棒元素 -->
+        style="position: fixed; top:10%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+        <button id="deviceStatus" style="display: none;">
+            點我允許方向感測
+        </button>
+        <h2>\ 揮舞螢光棒 /</h2>
+        <div id="lightStick" />
     </div>
     <div id="desktopContent"
         style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
@@ -89,14 +163,16 @@
     function monitorDeviceMotion() {
         if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", throttle(handleOrientation, 200), false);
-            window.addEventListener("devicemotion", throttle(handleMotion, 200), false);
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                deviceStatus.textContent = '請點擊此處允許方向訪問';
-                deviceStatus.style.cursor = 'pointer';
+                deviceStatus.style.display = 'inline-block';
                 deviceStatus.onclick = requestIOSPermission;
             }
         } else {
-            deviceStatus.textContent = '您的設備不支持動作感應';
+            deviceStatus.style.display = 'inline-block';
+            deviceStatus.innerText = '此裝置不支援方向感測';
+            deviceStatus.disabled = true;
+            deviceStatus.style.cursor = 'not-allowed';
+            deviceStatus.style.opacity = '0.6';
         }
     }
 
@@ -104,8 +180,7 @@
         DeviceOrientationEvent.requestPermission()
             .then(response => {
                 if (response === 'granted') {
-                    deviceStatus.textContent = '已允許方向訪問';
-                    deviceStatus.style.cursor = 'default';
+                    deviceStatus.style.display = 'none';
                 } else {
                     deviceStatus.textContent = '無法存取方向感應器';
                 }
@@ -167,11 +242,42 @@
                 console.error('發送資料失敗:', error);
             });
     }
+    let currentAngle = 0;
+    let targetAngle = 0;
+
+
 
     function rotateLightStick(rotationAngle) {
-        rotationAngle = rotationAngle * 15;
-        lightStick.style.transform = `translate(-50%, 50%) rotate(${rotationAngle}deg)`;
+        // 將 -1 / 0 / 1 轉換成目標角度
+        targetAngle = rotationAngle * 15; // 調整這裡可以控制幅度大小
     }
+
+    let velocity = 0;
+    const stiffness = 0.1;  // 彈性係數（越大越硬）
+    const damping = 0.8;    // 阻尼係數（越小彈得越久）
+
+
+    function animate() {
+        const force = targetAngle - currentAngle;
+
+        if (Math.abs(force) < 0.5 && Math.abs(velocity) < 0.2) {
+            velocity = 0;
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        const acceleration = force * stiffness;
+        velocity += acceleration;
+        velocity *= damping;
+
+        currentAngle += velocity;
+
+        lightStick.style.transform = `translate(-50% ,50px) rotate(${currentAngle}deg)`;
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+
 </script>
 
 

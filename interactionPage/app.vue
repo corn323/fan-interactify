@@ -29,6 +29,7 @@ const shakeData = ref({});
 const positionCache = reactive({});
 const updateInterval = ref(null);
 
+
 const UPDATE_FREQUENCY = 200;
 
 // 取得 QR Code 內容
@@ -138,17 +139,17 @@ onUnmounted(() => {
 }
 
 .light-stick {
-  width: 100px;
-  transition: transform 0.1s ease;
-  will-change: transform;
+  width: 50px;
+  transform: rotate(0deg);
+  transition: transform 0.4s cubic-bezier(0.25, 1.5, 0.5, 1);
 }
 
 .shake-left {
-  transform: rotate(-15deg);
+  transform: rotate(-20deg);
 }
 
 .shake-right {
-  transform: rotate(15deg);
+  transform: rotate(20deg);
 }
 
 /* === 平滑進出動畫 === */

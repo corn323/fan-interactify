@@ -42,7 +42,9 @@
  Email: contact@corn323.com
  Discord: corn323
  ## 協助者
- - [R靈](https://github.com/necro-wbj)：技術支援
- - 夜緋羽：美術支援
+ - [R靈](https://github.com/necro-wbj)：打包等技術支援
+ - [嗡嗡](http://github.com/tony2265)：fanInteraction頁面設計與製作支援
+ - 夜緋羽：螢光棒美術與測試支援
  - CClemon：測試支援
+ - [夜花櫻](https://github.com/tinyYana)：測試支援
  #### 感謝您使用　FanInteractify，讓我們一起為直播帶來更多互動與樂趣！

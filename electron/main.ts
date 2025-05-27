@@ -127,8 +127,8 @@ async function startNgrokAndApp(token: string) {
 async function showTokenInputWindow() {
   await prisma.userData.deleteMany();
   tokenInputWondow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 800,
+    minHeight: 600,
     autoHideMenuBar: true,
     icon: path.join(__dirname, '../public/favicon.ico'),
     webPreferences: {
@@ -147,8 +147,8 @@ async function showTokenInputWindow() {
 
 async function createWindow() {
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 900,
+    minHeight: 700,
     icon: path.join(__dirname, '../public/favicon.ico'),
     autoHideMenuBar: true,
     webPreferences: {
